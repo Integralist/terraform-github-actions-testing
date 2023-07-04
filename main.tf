@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     fastly = {
-      source = "fastly/fastly"
+      source  = "fastly/fastly"
       version = "5.2.2"
     }
   }
@@ -11,7 +11,7 @@ resource "fastly_service_vcl" "demo" {
   name = "terraform-github-actions-testing"
 
   domain {
-    name    = "terraform-github-actions-testing.integralist.co.uk"
+    name = "terraform-github-actions-testing.integralist-testing.co.uk"
   }
 
   backend {
