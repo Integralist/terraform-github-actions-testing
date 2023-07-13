@@ -11,7 +11,7 @@ resource "fastly_service_vcl" "demo" {
   name = "testing-multiple-environments"
 
   domain {
-    name = "testing-multiple-environments.integralist.co.uk"
+    name = "testing-multiple-environments.integralist-new.co.uk"
   }
 
   backend {
