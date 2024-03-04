@@ -33,7 +33,8 @@ data "fastly_package_hash" "api" {
 }
 
 resource "fastly_service_compute" "api" {
-  name = local.name
+  name    = local.name
+  comment = "modification 1"
 
   domain {
     name = "${local.name}.edgecompute.app"
