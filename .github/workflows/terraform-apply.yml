@@ -22,31 +22,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-        # IMPORTANT: Deleting a service with a resource-link is a two-step apply.
-        # We can't pass a -target to the Terraform GH Action either as a prerequisite step.
-        # This means we'll need to clear any `resource_link` blocks from the config.
-
-      - name: Review original TF config before modification
-        run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
-
-      - name: Remove resource_link blocks from TF config
-        run: |
-          while IFS= read -r line; do
-              if [[ "$line" =~ "resource_link {" || "$clear_line" == true ]]; then
-                if [[ "$line" =~ "}" ]]; then
-                  clear_line=false
-                else
-                  clear_line=true
-                fi
-                echo ""
-              else
-                echo "$line"
-              fi
-          done < ${{ env.SRV_CONFIG_DIR }}/main.tf > ./main.tf && mv ./main.tf ${{ env.SRV_CONFIG_DIR }}/main.tf
-
-      - name: Review new TF config before modification
-        run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
+      #
+      #   # IMPORTANT: Deleting a service with a resource-link is a two-step apply.
+      #   # We can't pass a -target to the Terraform GH Action either as a prerequisite step.
+      #   # This means we'll need to clear any `resource_link` blocks from the config.
+      #
+      # - name: Review original TF config before modification
+      #   run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
+      #
+      # - name: Remove resource_link blocks from TF config
+      #   run: |
+      #     while IFS= read -r line; do
+      #         if [[ "$line" =~ "resource_link {" || "$clear_line" == true ]]; then
+      #           if [[ "$line" =~ "}" ]]; then
+      #             clear_line=false
+      #           else
+      #             clear_line=true
+      #           fi
+      #           echo ""
+      #         else
+      #           echo "$line"
+      #         fi
+      #     done < ${{ env.SRV_CONFIG_DIR }}/main.tf > ./main.tf && mv ./main.tf ${{ env.SRV_CONFIG_DIR }}/main.tf
+      #
+      # - name: Review new TF config after modification
+      #   run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
 
       - name: Upload Configuration
         uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
