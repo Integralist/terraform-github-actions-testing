@@ -25,7 +25,7 @@ terraform {
 
 locals {
   name         = "testing-github-actions"
-  package_path = "./app.tar.gz"
+  package_path = "./app.tar.gz" # references ../../corp/stg/app.tar.gz
 }
 
 data "fastly_package_hash" "api" {
