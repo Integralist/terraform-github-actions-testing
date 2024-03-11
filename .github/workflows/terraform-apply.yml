@@ -23,76 +23,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-        # IMPORTANT: Deleting a service with a resource-link is a two-step apply.
-        # We can't pass a -target to the Terraform GH Action either as a prerequisite step.
-        # This means we'll need to clear any `resource_link` blocks from the config.
-
-      - name: Review original TF config before modification
-        run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
-
-      - name: Remove resource_link blocks from TF config
-        run: |
-          while IFS= read -r line; do
-              if [[ "$line" =~ "resource_link {" || "$clear_line" == true ]]; then
-                if [[ "$line" =~ "}" ]]; then
-                  clear_line=false
-                else
-                  clear_line=true
-                fi
-                echo ""
-              else
-                echo "$line"
-              fi
-          done < ${{ env.SRV_CONFIG_DIR }}/main.tf > ./main.tf && mv ./main.tf ${{ env.SRV_CONFIG_DIR }}/main.tf
-
-      - name: Review new TF config after modification
-        run: cat ${{ env.SRV_CONFIG_DIR }}/main.tf
-
       - name: Upload Configuration
-        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.2.0
         id: apply-upload
         with:
           workspace: ${{ env.TF_WORKSPACE }}
           directory: ${{ env.CONFIG_DIRECTORY }}
 
       - name: Create Apply Run
-        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.2.0
         id: apply-run
         with:
           workspace: ${{ env.TF_WORKSPACE }}
           configuration_version: ${{ steps.apply-upload.outputs.configuration_version_id }}
-          # is_destroy: true  # ERROR: This does nothing LOL. It's documented as will DESTROY infrastructure but it literally does nothing (only the plan is run).
 
       - name: Apply
-        uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
+        uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.2.0
         if: fromJSON(steps.apply-run.outputs.payload).data.attributes.actions.IsConfirmable
         id: apply
         with:
           run: ${{ steps.apply-run.outputs.run_id }}
           comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
 
-      - name: Clear all config
-        run: echo "" > ${{ env.SRV_CONFIG_DIR }}/main.tf
-
-      - name: Upload Configuration
-        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
-        id: apply-upload-destroy
-        with:
-          workspace: ${{ env.TF_WORKSPACE }}
-          directory: ${{ env.CONFIG_DIRECTORY }}
-
-      - name: Create Apply Run
-        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
-        id: apply-run-destroy
-        with:
-          workspace: ${{ env.TF_WORKSPACE }}
-          configuration_version: ${{ steps.apply-upload-destroy.outputs.configuration_version_id }}
-          # is_destroy: true  # ERROR: This does nothing LOL. It's documented as will DESTROY infrastructure but it literally does nothing (only the plan is run).
-
-      - name: Apply
-        uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
-        if: fromJSON(steps.apply-run-destroy.outputs.payload).data.attributes.actions.IsConfirmable
-        id: apply-destroy
-        with:
-          run: ${{ steps.apply-run-destroy.outputs.run_id }}
-          comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
